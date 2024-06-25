@@ -72,7 +72,10 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (Truck truck : trucks) {
-            totalPrice = totalPrice.add(truck.getPrice().subtract(truck.getDiscount()));
+
+            totalPrice = orderDTO.getIsDiscount() ?
+                    totalPrice.add(truck.getPrice().subtract(truck.getDiscount()))
+                    : truck.getPrice();
             truck.setStock(truck.getStock() - 1);
             truckRepository.save(truck);
         }
@@ -97,11 +100,14 @@ public class OrderServiceImpl implements OrderService {
         if (status == OrderStatus.CANCELLED) {
             for (Truck truck : order.getTrucks()) {
                 truck.setStock(truck.getStock() + 1);
+
                 truckRepository.save(truck);
             }
         }
 
+
         return orderRepository.save(order);
 
     }
+
 }
