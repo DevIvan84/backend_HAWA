@@ -14,6 +14,25 @@ services:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     command: /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 30s && /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -d master -i /docker-entrypoint-initdb.d/init-db.sql; tail -f /dev/null"
 
+  order-backend:
+    image: order-system-hawa
+    container_name: order-backend
+    depends_on:
+      - sqlserver
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://sqlserver:1433;databaseName=hawadb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=YourStrong!Passw0rd
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.SQLServerDialect
+    networks:
+      - order-network
+
 volumes:
   sqlserver_data:
-    driver: local
+
+networks:
+  order-network:
+    driver: bridge
